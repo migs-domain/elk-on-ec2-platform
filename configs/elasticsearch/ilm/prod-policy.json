@@ -1,0 +1,64 @@
+##############################################################################
+# ILM Policy: prod — hot 14d → warm 30-60d → cold 30-90d → delete
+# Apply via: PUT _ilm/policy/logs-prod-ilm-policy
+##############################################################################
+{
+  "policy": {
+    "phases": {
+      "hot": {
+        "min_age": "0ms",
+        "actions": {
+          "rollover": {
+            "max_primary_shard_size": "40gb",
+            "max_age": "1d",
+            "max_docs": 100000000
+          },
+          "set_priority": {
+            "priority": 100
+          }
+        }
+      },
+      "warm": {
+        "min_age": "14d",
+        "actions": {
+          "shrink": {
+            "number_of_shards": 1
+          },
+          "forcemerge": {
+            "max_num_segments": 1
+          },
+          "allocate": {
+            "require": {
+              "data_tier": "warm"
+            }
+          },
+          "set_priority": {
+            "priority": 50
+          }
+        }
+      },
+      "cold": {
+        "min_age": "60d",
+        "actions": {
+          "allocate": {
+            "require": {
+              "data_tier": "cold"
+            }
+          },
+          "freeze": {},
+          "set_priority": {
+            "priority": 0
+          }
+        }
+      },
+      "delete": {
+        "min_age": "180d",
+        "actions": {
+          "delete": {
+            "delete_searchable_snapshot": true
+          }
+        }
+      }
+    }
+  }
+}

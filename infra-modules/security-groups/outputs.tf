@@ -1,0 +1,10 @@
+output "bastion_sg_id"      { value = aws_security_group.bastion.id }
+output "es_master_sg_id"   { value = aws_security_group.es_master.id }
+output "es_data_sg_id"     { value = aws_security_group.es_data.id }
+output "es_ingest_sg_id"   { value = aws_security_group.es_ingest.id }
+output "kibana_sg_id"      { value = aws_security_group.kibana.id }
+output "logstash_sg_id"    { value = aws_security_group.logstash.id }
+output "fluentd_sg_id"     { value = aws_security_group.fluentd.id }
+output "filebeat_host_sg_id" { value = aws_security_group.filebeat_host.id }
+output "alb_sg_id"         { value = aws_security_group.alb.id }
+output "monitoring_sg_id"  { value = aws_security_group.monitoring.id }

@@ -1,0 +1,54 @@
+##############################################################################
+# JVM options — applied to all Elasticsearch nodes.
+# Place in /etc/elasticsearch/jvm.options.d/
+# Heap size is overridden at bootstrap by userdata.sh.tpl
+##############################################################################
+
+# Heap size set by bootstrap script (Xms=Xmx; max 31g)
+# -Xms4g
+# -Xmx4g
+
+## GC configuration — G1GC (recommended for ES 8.x with JDK 17)
+-XX:+UseG1GC
+-XX:G1ReservePercent=25
+-XX:InitiatingHeapOccupancyPercent=30
+-XX:MaxGCPauseMillis=200
+
+## JVM temporary directory
+-Djava.io.tmpdir=${ES_TMPDIR}
+
+## Heap dumps on OOM
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/var/lib/elasticsearch
+
+## GC logging with rotation (JDK 9+)
+-Xlog:gc*,gc+age=trace,safepoint:file=/var/log/elasticsearch/gc.log:utctime,pid,tags:filecount=32,filesize=64m
+
+## Disable speculative execution vulnerability mitigations for performance
+## (uncomment if running in fully isolated env — KNOW YOUR RISK)
+# -XX:-TieredCompilation
+
+## Java 17 modules
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+--add-opens=java.base/java.util=ALL-UNNAMED
+--add-opens=java.base/java.util.zip=ALL-UNNAMED
+
+## Allow JVM attach
+-XX:+UnlockDiagnosticVMOptions
+-XX:+DebugNonSafepoints
+
+## Performance
+-XX:+AlwaysPreTouch
+-Djava.awt.headless=true
+-Dfile.encoding=UTF-8
+-Djna.nosys=true
+-Dio.netty.noUnsafe=true
+-Dio.netty.noKeySetOptimization=true
+-Dio.netty.recycler.maxCapacityPerThread=0
+-Dlog4j.shutdownHookEnabled=false
+-Dlog4j2.disable.jmx=true
+
+## Disable OOM killer
+-Djava.security.policy=unlimited

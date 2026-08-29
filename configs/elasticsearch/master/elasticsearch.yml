@@ -1,0 +1,53 @@
+##############################################################################
+# elasticsearch.yml — MASTER NODES
+# Injected into SSM Parameter Store; fetched at bootstrap time.
+# Placeholders like {{CLUSTER_NAME}} are replaced by bootstrap script.
+##############################################################################
+cluster.name: "${cluster_name}"
+node.name: "PLACEHOLDER_SET_BY_BOOTSTRAP"
+
+node.roles:
+  - master
+
+# ── Network ──────────────────────────────────────────────────────────────────
+network.host: ["_ec2:privateIpv4_", "_local_"]
+http.port: 9200
+transport.port: 9300
+
+# ── Discovery ────────────────────────────────────────────────────────────────
+# Use EC2 discovery; bootstrap_hosts populated by launch template user-data
+discovery.seed_providers: ec2
+discovery.ec2.tag.ClusterName: "${cluster_name}"
+discovery.ec2.tag.NodeRole: "es-master"
+discovery.ec2.region: "${aws_region}"
+cluster.initial_master_nodes: []  # Set empty; nodes discover via EC2
+
+# ── Security / TLS ───────────────────────────────────────────────────────────
+xpack.security.enabled: true
+xpack.security.enrollment.enabled: true
+
+# Transport TLS
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: certificate
+xpack.security.transport.ssl.client_authentication: required
+xpack.security.transport.ssl.keystore.path: /etc/elasticsearch/certs/node.p12
+xpack.security.transport.ssl.truststore.path: /etc/elasticsearch/certs/ca.p12
+
+# HTTP TLS
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.keystore.path: /etc/elasticsearch/certs/node.p12
+xpack.security.http.ssl.truststore.path: /etc/elasticsearch/certs/ca.p12
+
+# ── Stack Monitoring ─────────────────────────────────────────────────────────
+xpack.monitoring.elasticsearch.collection.enabled: false  # Use Metricbeat
+xpack.monitoring.collection.enabled: false
+
+# ── Memory ───────────────────────────────────────────────────────────────────
+bootstrap.memory_lock: true
+
+# ── Indices ──────────────────────────────────────────────────────────────────
+action.destructive_requires_name: true
+cluster.routing.rebalance.enable: all
+
+# ── Logging ──────────────────────────────────────────────────────────────────
+logger.level: INFO

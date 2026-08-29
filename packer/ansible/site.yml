@@ -1,0 +1,26 @@
+##############################################################################
+# Ansible playbook: ELK node hardening and configuration
+# Invoked by Packer during AMI build
+##############################################################################
+---
+- name: ELK node configuration
+  hosts: default
+  become: true
+  gather_facts: true
+
+  vars:
+    elk_version: "{{ elk_version | default('8.12.2') }}"
+    node_role: "{{ node_role | default('es-master') }}"
+    environment: "{{ environment | default('dev') }}"
+
+  roles:
+    - role: common
+    - role: elasticsearch
+      when: node_role in ['es-master', 'es-data-hot', 'es-data-warm', 'es-ingest', 'es-coord']
+    - role: kibana
+      when: node_role == 'kibana'
+    - role: logstash
+      when: node_role == 'logstash'
+    - role: app_host
+      when: node_role == 'app-host'
+    - role: monitoring

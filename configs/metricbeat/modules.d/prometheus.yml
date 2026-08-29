@@ -1,0 +1,17 @@
+##############################################################################
+# Metricbeat Prometheus module — scrapes Fluent Bit metrics
+# Located at: /etc/metricbeat/modules.d/prometheus.yml
+##############################################################################
+- module: prometheus
+  period: 30s
+  # Fluent Bit exposes Prometheus metrics on port 2020
+  hosts: ["${FLUENTD_HOST}:2020"]
+  metrics_path: /api/v1/metrics/prometheus
+  metricsets: ["collector"]
+
+  # JVM/Elasticsearch Prometheus exporter (if deployed)
+  # Uncomment to scrape custom JVM metrics:
+  # - module: prometheus
+  #   period: 30s
+  #   hosts: ["${ES_HOST}:9114"]
+  #   metricsets: ["collector"]

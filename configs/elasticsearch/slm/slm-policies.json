@@ -1,0 +1,93 @@
+##############################################################################
+# SLM (Snapshot Lifecycle Management) policies
+# Register S3 repository first, then apply these policies.
+##############################################################################
+
+################################################################################
+# Step 1: Register S3 snapshot repository
+# PUT _snapshot/s3_repository
+################################################################################
+# {
+#   "type": "s3",
+#   "settings": {
+#     "bucket": "${SNAPSHOT_BUCKET}",
+#     "region": "${AWS_REGION}",
+#     "base_path": "elasticsearch-snapshots",
+#     "compress": true,
+#     "max_snapshot_bytes_per_sec": "100mb",
+#     "max_restore_bytes_per_sec": "100mb",
+#     "server_side_encryption": true
+#   }
+# }
+
+################################################################################
+# SLM Policy: dev — daily snapshot, keep 7
+# PUT _slm/policy/dev-daily-snapshot
+################################################################################
+{
+  "schedule": "0 30 2 * * ?",
+  "name": "<dev-snapshot-{now/d}>",
+  "repository": "s3_repository",
+  "config": {
+    "indices": ["*"],
+    "ignore_unavailable": true,
+    "include_global_state": true,
+    "metadata": {
+      "policy": "dev-daily-snapshot",
+      "environment": "dev"
+    }
+  },
+  "retention": {
+    "expire_after": "7d",
+    "min_count": 2,
+    "max_count": 7
+  }
+}
+
+################################################################################
+# SLM Policy: stable — daily snapshot, keep 30
+# PUT _slm/policy/stable-daily-snapshot
+################################################################################
+{
+  "schedule": "0 30 1 * * ?",
+  "name": "<stable-snapshot-{now/d}>",
+  "repository": "s3_repository",
+  "config": {
+    "indices": ["*"],
+    "ignore_unavailable": true,
+    "include_global_state": true,
+    "metadata": {
+      "policy": "stable-daily-snapshot",
+      "environment": "stable"
+    }
+  },
+  "retention": {
+    "expire_after": "30d",
+    "min_count": 7,
+    "max_count": 30
+  }
+}
+
+################################################################################
+# SLM Policy: prod — daily snapshot, keep 90
+# PUT _slm/policy/prod-daily-snapshot
+################################################################################
+{
+  "schedule": "0 0 1 * * ?",
+  "name": "<prod-snapshot-{now/d}>",
+  "repository": "s3_repository",
+  "config": {
+    "indices": ["*"],
+    "ignore_unavailable": true,
+    "include_global_state": true,
+    "metadata": {
+      "policy": "prod-daily-snapshot",
+      "environment": "prod"
+    }
+  },
+  "retention": {
+    "expire_after": "90d",
+    "min_count": 14,
+    "max_count": 90
+  }
+}

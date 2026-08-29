@@ -1,0 +1,44 @@
+##############################################################################
+# elasticsearch.yml — DATA-HOT NODES
+##############################################################################
+cluster.name: "${cluster_name}"
+node.name: "PLACEHOLDER_SET_BY_BOOTSTRAP"
+
+node.roles:
+  - data_hot
+  - data_content
+
+network.host: ["_ec2:privateIpv4_", "_local_"]
+http.port: 9200
+transport.port: 9300
+
+discovery.seed_providers: ec2
+discovery.ec2.tag.ClusterName: "${cluster_name}"
+discovery.ec2.tag.NodeRole: "es-master"
+discovery.ec2.region: "${aws_region}"
+
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: certificate
+xpack.security.transport.ssl.client_authentication: required
+xpack.security.transport.ssl.keystore.path: /etc/elasticsearch/certs/node.p12
+xpack.security.transport.ssl.truststore.path: /etc/elasticsearch/certs/ca.p12
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.keystore.path: /etc/elasticsearch/certs/node.p12
+xpack.security.http.ssl.truststore.path: /etc/elasticsearch/certs/ca.p12
+
+bootstrap.memory_lock: true
+
+# Data path — mounted separate EBS gp3 volume
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+
+# ILM tier routing
+node.attr.data_tier: hot
+node.attr.box_type: hot
+
+action.destructive_requires_name: true
+indices.recovery.max_bytes_per_sec: 200mb
+
+xpack.monitoring.elasticsearch.collection.enabled: false
+xpack.monitoring.collection.enabled: false

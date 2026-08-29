@@ -1,0 +1,11 @@
+##############################################################################
+# Filebeat System module configuration
+# Located at: /etc/filebeat/modules.d/system.yml
+##############################################################################
+- module: system
+  syslog:
+    enabled: true
+    var.paths: ["/var/log/syslog*", "/var/log/messages*"]
+  auth:
+    enabled: true
+    var.paths: ["/var/log/auth.log*", "/var/log/secure*"]

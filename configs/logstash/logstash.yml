@@ -1,0 +1,44 @@
+##############################################################################
+# logstash.yml — Logstash main configuration
+# Located at: /etc/logstash/logstash.yml
+##############################################################################
+
+# ── Node identity ─────────────────────────────────────────────────────────────
+node.name: "${LOGSTASH_NODE_NAME}"
+
+# ── Pipeline defaults ─────────────────────────────────────────────────────────
+pipeline.workers: 4
+pipeline.batch.size: 500
+pipeline.batch.delay: 100
+pipeline.ordered: false  # allow out-of-order for throughput
+
+# ── Persistent queue (global default; overridden per-pipeline) ────────────────
+queue.type: persisted
+queue.max_bytes: 4gb
+queue.checkpoint.writes: 1024
+
+# ── Dead Letter Queue ─────────────────────────────────────────────────────────
+dead_letter_queue.enable: true
+dead_letter_queue.max_bytes: 1gb
+
+# ── Monitoring (HTTP API for Metricbeat scraping) ─────────────────────────────
+http.enabled: true
+http.host: "0.0.0.0"
+http.port: 9600
+
+# Disable internal Elasticsearch monitoring (use Metricbeat instead)
+xpack.monitoring.enabled: false
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+log.level: info
+log.format: json
+path.logs: /var/log/logstash
+
+# ── Config reloading ─────────────────────────────────────────────────────────
+config.reload.automatic: true
+config.reload.interval: 30s
+
+# ── Path configuration ────────────────────────────────────────────────────────
+path.data: /var/lib/logstash
+path.config: /etc/logstash/conf.d
+path.plugins: /usr/share/logstash/plugins

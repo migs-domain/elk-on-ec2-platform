@@ -1,0 +1,26 @@
+##############################################################################
+# Metricbeat Elasticsearch module
+# Located at: /etc/metricbeat/modules.d/elasticsearch.yml
+##############################################################################
+- module: elasticsearch
+  xpack.enabled: true
+  period: 10s
+  hosts: ["https://${ES_HOSTS}"]
+  username: "${ES_REMOTE_MONITORING_USER}"
+  password: "${ES_REMOTE_MONITORING_PASSWORD}"
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/etc/metricbeat/certs/ca.crt"]
+  ssl.certificate: "/etc/metricbeat/certs/metricbeat.crt"
+  ssl.key: "/etc/metricbeat/certs/metricbeat.key"
+  ssl.verification_mode: "certificate"
+  metricsets:
+    - node
+    - node_stats
+    - cluster_stats
+    - index
+    - index_recovery
+    - index_summary
+    - shard
+    - ml_job
+    - pending_tasks
+    - ccr

@@ -1,0 +1,11 @@
+output "snapshot_bucket_arn"       { value = module.bucket["snapshots"].bucket_arn }
+output "snapshot_bucket_id"        { value = module.bucket["snapshots"].bucket_id }
+output "alb_logs_bucket_arn"       { value = module.bucket["alb-logs"].bucket_arn }
+output "alb_logs_bucket_id"        { value = module.bucket["alb-logs"].bucket_id }
+output "cloudtrail_bucket_arn"     { value = module.bucket["cloudtrail"].bucket_arn }
+output "vpc_flow_logs_bucket_arn"  { value = module.bucket["vpc-flow-logs"].bucket_arn }
+output "waf_logs_bucket_arn"       { value = module.bucket["waf-logs"].bucket_arn }
+output "kms_key_arn"               { value = aws_kms_key.buckets.arn }
+output "kms_key_id"                { value = aws_kms_key.buckets.id }
+output "waf_firehose_arn"          { value = var.enable_waf ? aws_kinesis_firehose_delivery_stream.waf[0].arn : null }
+output "web_acl_arn"               { value = var.enable_waf ? aws_wafv2_web_acl.this[0].arn : null }

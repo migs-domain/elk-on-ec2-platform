@@ -1,0 +1,193 @@
+##############################################################################
+# Elasticsearch Watcher Alerts
+# Load via: POST _watcher/watch/<watch_id>
+# These are starter templates; adjust thresholds per SLO.
+##############################################################################
+
+################################################################################
+# Alert 1: JVM Heap > 80%
+################################################################################
+# PUT _watcher/watch/elk-jvm-heap-high
+{
+  "trigger": {
+    "schedule": { "interval": "1m" }
+  },
+  "input": {
+    "search": {
+      "request": {
+        "indices": [".monitoring-es-*", "metricbeat-*"],
+        "body": {
+          "query": {
+            "bool": {
+              "must": [
+                { "range": { "@timestamp": { "gte": "now-2m" } } },
+                { "term": { "metricset.name": "node_stats" } }
+              ],
+              "filter": [
+                { "range": { "elasticsearch.node.stats.jvm.mem.heap.used.pct": { "gte": 0.80 } } }
+              ]
+            }
+          },
+          "aggs": {
+            "high_heap_nodes": {
+              "terms": { "field": "elasticsearch.node.name", "size": 10 },
+              "aggs": {
+                "max_heap": { "max": { "field": "elasticsearch.node.stats.jvm.mem.heap.used.pct" } }
+              }
+            }
+          },
+          "size": 0
+        }
+      }
+    }
+  },
+  "condition": {
+    "compare": { "ctx.payload.aggregations.high_heap_nodes.buckets": { "not_eq": [] } }
+  },
+  "actions": {
+    "notify_slack": {
+      "throttle_period": "10m",
+      "webhook": {
+        "scheme": "https",
+        "host": "hooks.slack.com",
+        "port": 443,
+        "method": "post",
+        "path": "/services/{{ctx.metadata.slack_path}}",
+        "headers": { "Content-Type": "application/json" },
+        "body": "{\"text\":\":warning: *ES JVM Heap Alert*\\nNode(s) above 80% heap. Cluster: {{ctx.metadata.cluster_name}}\\n{{#ctx.payload.aggregations.high_heap_nodes.buckets}}Node: {{key}} — {{max_heap.value | multiply:100 | round:1}}%\\n{{/ctx.payload.aggregations.high_heap_nodes.buckets}}\"}"
+      }
+    }
+  },
+  "metadata": {
+    "cluster_name": "${CLUSTER_NAME}",
+    "slack_path": "${SLACK_PATH}"
+  }
+}
+
+################################################################################
+# Alert 2: Unassigned Shards
+################################################################################
+# PUT _watcher/watch/elk-unassigned-shards
+{
+  "trigger": { "schedule": { "interval": "2m" } },
+  "input": {
+    "http": {
+      "request": {
+        "url": "https://localhost:9200/_cluster/health",
+        "auth": { "basic": { "username": "elastic", "password": "{{ctx.metadata.es_password}}" } }
+      }
+    }
+  },
+  "condition": {
+    "compare": { "ctx.payload.unassigned_shards": { "gt": 0 } }
+  },
+  "actions": {
+    "notify_slack": {
+      "throttle_period": "5m",
+      "webhook": {
+        "scheme": "https",
+        "host": "hooks.slack.com",
+        "port": 443,
+        "method": "post",
+        "path": "/services/{{ctx.metadata.slack_path}}",
+        "headers": { "Content-Type": "application/json" },
+        "body": "{\"text\":\":red_circle: *Unassigned Shards Alert*\\n{{ctx.payload.unassigned_shards}} unassigned shards in cluster {{ctx.payload.cluster_name}}\\nStatus: {{ctx.payload.status}}\"}"
+      }
+    }
+  }
+}
+
+################################################################################
+# Alert 3: Disk Watermark (>75% used)
+################################################################################
+# PUT _watcher/watch/elk-disk-watermark
+{
+  "trigger": { "schedule": { "interval": "5m" } },
+  "input": {
+    "search": {
+      "request": {
+        "indices": ["metricbeat-*"],
+        "body": {
+          "query": {
+            "bool": {
+              "must": [
+                { "range": { "@timestamp": { "gte": "now-6m" } } },
+                { "term": { "metricset.module": "system" } },
+                { "term": { "metricset.name": "filesystem" } }
+              ],
+              "filter": [
+                { "range": { "system.filesystem.used.pct": { "gte": 0.75 } } },
+                { "term": { "system.filesystem.mount_point": "/var/lib/elasticsearch" } }
+              ]
+            }
+          },
+          "size": 10
+        }
+      }
+    }
+  },
+  "condition": {
+    "compare": { "ctx.payload.hits.total.value": { "gt": 0 } }
+  },
+  "actions": {
+    "notify_slack": {
+      "throttle_period": "15m",
+      "webhook": {
+        "scheme": "https",
+        "host": "hooks.slack.com",
+        "port": 443,
+        "method": "post",
+        "path": "/services/{{ctx.metadata.slack_path}}",
+        "headers": { "Content-Type": "application/json" },
+        "body": "{\"text\":\":rotating_light: *Disk Watermark Alert*\\nElasticsearch data volume >75% full on one or more nodes. Check and add capacity!\"}"
+      }
+    }
+  }
+}
+
+################################################################################
+# Alert 4: Logstash Pipeline Blocked / PQ Full
+################################################################################
+# PUT _watcher/watch/elk-logstash-pq-full
+{
+  "trigger": { "schedule": { "interval": "1m" } },
+  "input": {
+    "search": {
+      "request": {
+        "indices": ["metricbeat-*"],
+        "body": {
+          "query": {
+            "bool": {
+              "must": [
+                { "range": { "@timestamp": { "gte": "now-2m" } } },
+                { "term": { "metricset.name": "node_stats" } },
+                { "term": { "metricset.module": "logstash" } }
+              ],
+              "filter": [
+                { "range": { "logstash.node.stats.pipelines.queue.events_count": { "gte": 1000000 } } }
+              ]
+            }
+          },
+          "size": 5
+        }
+      }
+    }
+  },
+  "condition": {
+    "compare": { "ctx.payload.hits.total.value": { "gt": 0 } }
+  },
+  "actions": {
+    "notify_slack": {
+      "throttle_period": "5m",
+      "webhook": {
+        "scheme": "https",
+        "host": "hooks.slack.com",
+        "port": 443,
+        "method": "post",
+        "path": "/services/{{ctx.metadata.slack_path}}",
+        "headers": { "Content-Type": "application/json" },
+        "body": "{\"text\":\":warning: *Logstash PQ Near Capacity*\\nPipeline queue exceeding 1M events. Check Elasticsearch and Logstash connectivity.\"}"
+      }
+    }
+  }
+}

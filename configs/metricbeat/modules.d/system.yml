@@ -1,0 +1,23 @@
+##############################################################################
+# Metricbeat System module
+# Located at: /etc/metricbeat/modules.d/system.yml
+##############################################################################
+- module: system
+  period: 30s
+  metricsets:
+    - cpu
+    - load
+    - memory
+    - network
+    - process
+    - process_summary
+    - socket_summary
+    - filesystem
+    - fsstat
+    - diskio
+    - uptime
+  process.include_top_n:
+    by_cpu: 10
+    by_memory: 10
+  cpu.metrics: ["percentages", "normalized_percentages"]
+  core.metrics: ["percentages"]

@@ -1,0 +1,53 @@
+##############################################################################
+# Logstash pipelines.yml — orchestrates all pipeline definitions
+# Located at: /etc/logstash/pipelines.yml
+##############################################################################
+
+# ── ALB Access Logs ───────────────────────────────────────────────────────────
+- pipeline.id: alb-access
+  path.config: "/etc/logstash/conf.d/alb-logs.conf"
+  pipeline.workers: 4
+  pipeline.batch.size: 500
+  pipeline.batch.delay: 100
+  queue.type: persisted
+  queue.max_bytes: 4gb
+  dead_letter_queue.enable: true
+  dead_letter_queue.max_bytes: 1gb
+  path.queue: "/var/lib/logstash/queue/alb"
+  path.dead_letter_queue: "/var/lib/logstash/dlq/alb"
+
+# ── VPC Flow Logs ─────────────────────────────────────────────────────────────
+- pipeline.id: vpc-flow
+  path.config: "/etc/logstash/conf.d/vpc-flow-logs.conf"
+  pipeline.workers: 4
+  pipeline.batch.size: 500
+  queue.type: persisted
+  queue.max_bytes: 4gb
+  dead_letter_queue.enable: true
+  dead_letter_queue.max_bytes: 1gb
+  path.queue: "/var/lib/logstash/queue/vpc-flow"
+  path.dead_letter_queue: "/var/lib/logstash/dlq/vpc-flow"
+
+# ── CloudTrail Logs ───────────────────────────────────────────────────────────
+- pipeline.id: cloudtrail
+  path.config: "/etc/logstash/conf.d/cloudtrail.conf"
+  pipeline.workers: 2
+  pipeline.batch.size: 250
+  queue.type: persisted
+  queue.max_bytes: 2gb
+  dead_letter_queue.enable: true
+  dead_letter_queue.max_bytes: 512mb
+  path.queue: "/var/lib/logstash/queue/cloudtrail"
+  path.dead_letter_queue: "/var/lib/logstash/dlq/cloudtrail"
+
+# ── WAF Logs ──────────────────────────────────────────────────────────────────
+- pipeline.id: waf-logs
+  path.config: "/etc/logstash/conf.d/waf-logs.conf"
+  pipeline.workers: 2
+  pipeline.batch.size: 250
+  queue.type: persisted
+  queue.max_bytes: 2gb
+  dead_letter_queue.enable: true
+  dead_letter_queue.max_bytes: 512mb
+  path.queue: "/var/lib/logstash/queue/waf"
+  path.dead_letter_queue: "/var/lib/logstash/dlq/waf"

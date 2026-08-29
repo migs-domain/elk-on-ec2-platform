@@ -1,0 +1,12 @@
+##############################################################################
+# Metricbeat Logstash module
+# Located at: /etc/metricbeat/modules.d/logstash.yml
+##############################################################################
+- module: logstash
+  xpack.enabled: true
+  period: 10s
+  hosts: ["http://${LOGSTASH_HOST}:9600"]
+  # No TLS on Logstash monitoring API (internal VPC only)
+  metricsets:
+    - node
+    - node_stats

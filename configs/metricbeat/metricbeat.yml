@@ -1,0 +1,56 @@
+##############################################################################
+# Metricbeat configuration — all ELK nodes
+# Collects system, Elasticsearch, Logstash, and Prometheus metrics.
+# Located at: /etc/metricbeat/metricbeat.yml
+##############################################################################
+
+metricbeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: true
+  reload.period: 30s
+
+# ── Processors ────────────────────────────────────────────────────────────────
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - add_fields:
+      target: ''
+      fields:
+        environment: ${ENVIRONMENT}
+        elk_cluster: ${CLUSTER_NAME}
+
+# ── Output to Elasticsearch ───────────────────────────────────────────────────
+output.elasticsearch:
+  hosts: ["${ES_HOSTS}"]
+  protocol: "https"
+  username: "${ES_MONITORING_USER}"
+  password: "${ES_MONITORING_PASSWORD}"
+  ssl.enabled: true
+  ssl.certificate_authorities: ["/etc/metricbeat/certs/ca.crt"]
+  ssl.certificate: "/etc/metricbeat/certs/metricbeat.crt"
+  ssl.key: "/etc/metricbeat/certs/metricbeat.key"
+  ssl.verification_mode: "certificate"
+  # Use the .monitoring-* stack monitoring data stream
+  index: "metricbeat-%{[agent.version]}"
+
+# ── Internal monitoring disabled (use dedicated monitoring cluster or same cluster) ──
+monitoring.enabled: false
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/metricbeat
+  name: metricbeat.log
+  keepfiles: 7
+  permissions: 0640
+
+# ── Kibana connection (for dashboards setup) ──────────────────────────────────
+setup.kibana:
+  host: "https://${KIBANA_HOST}:5601"
+  ssl.certificate_authorities: ["/etc/metricbeat/certs/ca.crt"]
+  ssl.certificate: "/etc/metricbeat/certs/metricbeat.crt"
+  ssl.key: "/etc/metricbeat/certs/metricbeat.key"
+
+setup.dashboards.enabled: false  # managed via NDJSON import

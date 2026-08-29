@@ -1,0 +1,15 @@
+##############################################################################
+# Filebeat Nginx module configuration
+# Located at: /etc/filebeat/modules.d/nginx.yml
+##############################################################################
+- module: nginx
+  access:
+    enabled: true
+    var.paths: ["/var/log/nginx/access.log*"]
+    # Use ECS-compatible pipeline
+    var.use_ecs_compliant_vars: true
+  error:
+    enabled: true
+    var.paths: ["/var/log/nginx/error.log*"]
+  ingestion:
+    pipeline: "filebeat-nginx-access-pipeline"

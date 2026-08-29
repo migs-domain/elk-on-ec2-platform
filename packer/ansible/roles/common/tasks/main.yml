@@ -1,0 +1,83 @@
+##############################################################################
+# Ansible role: common
+# Applies to all node types
+##############################################################################
+---
+# tasks/main.yml
+
+- name: Set hostname to node role
+  hostname:
+    name: "{{ node_role }}-placeholder"
+
+- name: Configure NTP (chrony)
+  package:
+    name: chrony
+    state: present
+
+- name: Enable chrony
+  service:
+    name: chronyd
+    enabled: true
+    state: started
+
+- name: Disable swap permanently
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*\s+swap\s+.*)$'
+    replace: '# \1  # disabled by Ansible'
+
+- name: Set vm.max_map_count
+  sysctl:
+    name: vm.max_map_count
+    value: "262144"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-elasticsearch.conf
+    reload: true
+
+- name: Set vm.swappiness
+  sysctl:
+    name: vm.swappiness
+    value: "1"
+    state: present
+    sysctl_file: /etc/sysctl.d/99-elasticsearch.conf
+    reload: true
+
+- name: Configure SSH hardening
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  loop:
+    - { regexp: '^#?PermitRootLogin', line: 'PermitRootLogin no' }
+    - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication no' }
+    - { regexp: '^#?X11Forwarding', line: 'X11Forwarding no' }
+    - { regexp: '^#?MaxAuthTries', line: 'MaxAuthTries 3' }
+    - { regexp: '^#?ClientAliveInterval', line: 'ClientAliveInterval 300' }
+    - { regexp: '^#?ClientAliveCountMax', line: 'ClientAliveCountMax 2' }
+
+- name: Enable UFW (Ubuntu) or firewalld (RHEL) - placeholder
+  # Security groups handle perimeter; host firewall is defense-in-depth
+  debug:
+    msg: "Host firewall managed by OS default; perimeter by VPC Security Groups"
+
+- name: Install CloudWatch agent
+  block:
+    - name: Download CloudWatch agent
+      get_url:
+        url: "https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb"
+        dest: /tmp/amazon-cloudwatch-agent.deb
+      when: ansible_os_family == 'Debian'
+
+    - name: Install CloudWatch agent (Debian)
+      apt:
+        deb: /tmp/amazon-cloudwatch-agent.deb
+        state: present
+      when: ansible_os_family == 'Debian'
+
+    - name: Install CloudWatch agent (RHEL)
+      dnf:
+        name: "https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"
+        state: present
+        disable_gpg_check: true
+      when: ansible_os_family == 'RedHat'

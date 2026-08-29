@@ -1,0 +1,112 @@
+##############################################################################
+# Index templates for all data streams
+# Apply via: POST _index_template/<name>
+##############################################################################
+
+################################################################################
+# ALB access logs index template
+# POST _index_template/logs-aws.alb
+################################################################################
+{
+  "index_patterns": ["logs-aws.alb-*"],
+  "data_stream": {},
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": "ENV_REPLICA_COUNT",
+      "index.lifecycle.name": "ENV_ILM_POLICY",
+      "index.codec": "best_compression",
+      "index.mapping.total_fields.limit": 2000,
+      "index.refresh_interval": "30s"
+    },
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "strings_as_keywords": {
+            "match_mapping_type": "string",
+            "mapping": { "type": "keyword", "ignore_above": 1024 }
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp":           { "type": "date" },
+        "source":               { "properties": { "ip": { "type": "ip" }, "port": { "type": "integer" } } },
+        "destination":          { "properties": { "ip": { "type": "ip" }, "port": { "type": "integer" } } },
+        "http.request.method":  { "type": "keyword" },
+        "http.response.status_code": { "type": "integer" },
+        "http.response.bytes":  { "type": "long" },
+        "http.request.bytes":   { "type": "long" },
+        "url.original":         { "type": "wildcard" },
+        "user_agent.original":  { "type": "keyword" },
+        "geoip.location":       { "type": "geo_point" },
+        "tls.version":          { "type": "keyword" }
+      }
+    }
+  }
+}
+
+################################################################################
+# VPC Flow Logs index template
+# POST _index_template/logs-aws.vpcflow
+################################################################################
+{
+  "index_patterns": ["logs-aws.vpcflow-*"],
+  "data_stream": {},
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": "ENV_REPLICA_COUNT",
+      "index.lifecycle.name": "ENV_ILM_POLICY",
+      "index.codec": "best_compression",
+      "index.refresh_interval": "60s"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp":          { "type": "date" },
+        "source.ip":           { "type": "ip" },
+        "source.port":         { "type": "integer" },
+        "destination.ip":      { "type": "ip" },
+        "destination.port":    { "type": "integer" },
+        "network.bytes":       { "type": "long" },
+        "network.packets":     { "type": "long" },
+        "event.action":        { "type": "keyword" },
+        "protocol":            { "type": "integer" },
+        "protocol_name":       { "type": "keyword" },
+        "source_geo.location": { "type": "geo_point" }
+      }
+    }
+  }
+}
+
+################################################################################
+# CloudTrail index template
+# POST _index_template/logs-aws.cloudtrail
+################################################################################
+{
+  "index_patterns": ["logs-aws.cloudtrail-*"],
+  "data_stream": {},
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": "ENV_REPLICA_COUNT",
+      "index.lifecycle.name": "ENV_ILM_POLICY",
+      "index.codec": "best_compression",
+      "index.refresh_interval": "30s"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp":        { "type": "date" },
+        "source.ip":         { "type": "ip" },
+        "event.action":      { "type": "keyword" },
+        "event.provider":    { "type": "keyword" },
+        "cloud.region":      { "type": "keyword" },
+        "cloud.account.id":  { "type": "keyword" },
+        "event.id":          { "type": "keyword" },
+        "source_geo.location": { "type": "geo_point" }
+      }
+    }
+  }
+}
