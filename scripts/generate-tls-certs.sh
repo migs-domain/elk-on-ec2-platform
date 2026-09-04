@@ -6,7 +6,7 @@
 ##############################################################################
 set -euo pipefail
 
-AWS_REGION="${AWS_REGION:-us-east-1}"
+AWS_REGION="${AWS_REGION:-us-east-2}"
 SSM_PREFIX="${SSM_PREFIX:-/elk/dev}"
 ENVIRONMENT="${ENVIRONMENT:-dev}"
 CLUSTER_NAME="${CLUSTER_NAME:-elk-cluster}"

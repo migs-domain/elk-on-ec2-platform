@@ -3,7 +3,7 @@
 ##############################################################################
 
 ENVIRONMENT  ?= dev
-REGION       ?= us-east-1
+REGION       ?= us-east-2
 ELK_VERSION  ?= 8.12.2
 NODE_ROLE    ?= es-master
 

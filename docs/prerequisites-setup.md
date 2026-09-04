@@ -32,7 +32,7 @@ Jenkins agent (EC2 instance)
     └─ permission: sts:AssumeRole on TerraformDeployRole-dev/stable/prod
 
 TerraformDeployRole-dev
-  └─ permission: create/modify/destroy all resources in the account
+  └─ permission: (see policy below)
   └─ trust: allows JenkinsAgentRole to assume it
 ```
 
@@ -368,10 +368,10 @@ If you don't have a domain, you can:
    - Value: paste the ACM-provided value (e.g. `_def456.acm-validations.aws.`)
    - TTL: 300
 8. Wait 2–5 minutes. ACM will flip to **"Issued"** status automatically.
-9. Copy the **Certificate ARN** — it looks like `arn:aws:acm:us-east-1:111111111111:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
-10. Paste it into `infra-live/dev/us-east-1/alb/terragrunt.hcl`:
+9. Copy the **Certificate ARN** — it looks like `arn:aws:acm:us-east-2:111111111111:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
+10. Paste it into `infra-live/dev/us-east-2/alb/terragrunt.hcl`:
     ```hcl
-    acm_certificate_arn = "arn:aws:acm:us-east-1:111111111111:certificate/YOUR-CERT-ARN"
+    acm_certificate_arn = "arn:aws:acm:us-east-2:111111111111:certificate/YOUR-CERT-ARN"
     ```
 
 > **Certificate renewal**: ACM auto-renews as long as the CNAME record remains in DNS. Never delete it.
@@ -409,7 +409,7 @@ The Terraform modules do not currently create Route 53 records automatically —
 
 To get the Kibana ALB DNS name after apply:
 ```bash
-cd infra-live/dev/us-east-1/alb
+cd infra-live/dev/us-east-2/alb
 terragrunt output kibana_alb_dns_name
 ```
 
@@ -511,7 +511,7 @@ aws configure sso
 
 # Method 2: Access keys (for service accounts; not recommended for humans)
 aws configure
-# Enter Access Key ID, Secret Access Key, default region (us-east-1), output format (json)
+# Enter Access Key ID, Secret Access Key, default region (us-east-2), output format (json)
 
 # Verify
 aws sts get-caller-identity

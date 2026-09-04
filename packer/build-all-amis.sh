@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 ##############################################################################
 # build-all-amis.sh — Build all node-role AMIs sequentially or in parallel
-# Usage: ./build-all-amis.sh [--parallel] [--region us-east-1] [--version 8.12.2]
+# Usage: ./build-all-amis.sh [--parallel] [--region us-east-2] [--version 8.12.2]
 ##############################################################################
 set -euo pipefail
 
 ELK_VERSION="${ELK_VERSION:-8.12.2}"
-AWS_REGION="${AWS_REGION:-us-east-1}"
+AWS_REGION="${AWS_REGION:-us-east-2}"
 PACKER_VPC_ID="${PACKER_VPC_ID:?Set PACKER_VPC_ID}"
 PACKER_SUBNET_ID="${PACKER_SUBNET_ID:?Set PACKER_SUBNET_ID}"
 PARALLEL="${1:-}"

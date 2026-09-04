@@ -31,7 +31,7 @@ pipeline {
     string(
       name: 'MODULE',
       defaultValue: '',
-      description: 'Leave blank to run all modules, or specify a single module path (e.g. us-east-1/vpc)'
+      description: 'Leave blank to run all modules, or specify a single module path (e.g. us-east-2/vpc)'
     )
     booleanParam(
       name: 'AUTO_APPROVE',
@@ -48,7 +48,7 @@ pipeline {
   environment {
     TF_VERSION        = '1.7.5'
     TG_VERSION        = '0.57.0'
-    AWS_DEFAULT_REGION = 'us-east-1'
+    AWS_DEFAULT_REGION = 'us-east-2'
     PLAN_ARTIFACT     = "tfplan-${params.ENVIRONMENT}-${BUILD_NUMBER}.txt"
     // Credentials injected via Jenkins credential store (never hardcoded)
     AWS_ROLE_ARN      = credentials("aws-deploy-role-${params.ENVIRONMENT}")

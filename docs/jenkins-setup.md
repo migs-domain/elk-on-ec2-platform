@@ -828,7 +828,7 @@ is needed. Skip this section.
 2. Set parameters:
    - `ENVIRONMENT`: `dev`
    - `ACTION`: `plan`
-   - `MODULE`: `us-east-1/vpc` (start with just one module)
+   - `MODULE`: `us-east-2/vpc` (start with just one module)
    - `AUTO_APPROVE`: unchecked
    - `ELK_VERSION`: `8.12.2`
 3. Click **Build**
@@ -1023,7 +1023,7 @@ Error: Error acquiring the state lock
 ```bash
 # Find the lock ID in the error output (a UUID)
 # Then force-unlock
-cd infra-live/dev/us-east-1/vpc
+cd infra-live/dev/us-east-2/vpc
 terragrunt force-unlock LOCK_ID_FROM_ERROR
 ```
 

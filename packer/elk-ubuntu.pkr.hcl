@@ -19,7 +19,7 @@ packer {
 }
 
 # ── Variables ─────────────────────────────────────────────────────────────────
-variable "aws_region"    { type = string; default = "us-east-1" }
+variable "aws_region"    { type = string; default = "us-east-2" }
 variable "elk_version"   { type = string; default = "8.12.2" }
 variable "jdk_version"   { type = string; default = "17" }
 variable "node_role"     { type = string; default = "es-master" }

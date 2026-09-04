@@ -64,9 +64,9 @@ You need an HTTPS certificate for the Kibana ALB. ACM provides free, auto-renewi
 
 1. Request a certificate in ACM for `kibana.elk.yourdomain.com` (and optionally `*.elk.yourdomain.com`)
 2. Validate ownership via DNS — ACM gives you a CNAME record to add to Route 53
-3. Copy the resulting **Certificate ARN** and paste it into `infra-live/dev/us-east-1/alb/terragrunt.hcl`:
+3. Copy the resulting **Certificate ARN** and paste it into `infra-live/dev/us-east-2/alb/terragrunt.hcl`:
    ```hcl
-   acm_certificate_arn = "arn:aws:acm:us-east-1:111111111111:certificate/YOUR-CERT-ARN"
+   acm_certificate_arn = "arn:aws:acm:us-east-2:111111111111:certificate/YOUR-CERT-ARN"
    ```
 
 See [prerequisites-setup.md → ACM Certificate Setup](prerequisites-setup.md#2-acm-certificate-setup) for the console walkthrough.
@@ -101,9 +101,9 @@ Jenkins does not need any AWS access keys configured — the `JenkinsAgentRole` 
 
 Run the bootstrap script once before any `terragrunt apply`:
 ```bash
-./scripts/bootstrap-remote-state.sh dev us-east-1
-./scripts/bootstrap-remote-state.sh stable us-east-1
-./scripts/bootstrap-remote-state.sh prod us-east-1
+./scripts/bootstrap-remote-state.sh dev us-east-2
+./scripts/bootstrap-remote-state.sh stable us-east-2
+./scripts/bootstrap-remote-state.sh prod us-east-2
 ```
 This creates the state S3 bucket (versioned, encrypted) and DynamoDB lock table.
 
@@ -200,7 +200,7 @@ elk-platform/
 │   ├── terragrunt.hcl            # Root: remote state, provider gen, shared inputs
 │   ├── dev/
 │   │   ├── env.hcl               # Dev-specific variables
-│   │   └── us-east-1/
+│   │   └── us-east-2/
 │   │       ├── vpc/
 │   │       ├── vpc-endpoints/
 │   │       ├── security-groups/
@@ -248,9 +248,9 @@ elk-platform/
 ```bash
 export ORG_PREFIX="acme"
 export PROJECT="elk"
-./scripts/bootstrap-remote-state.sh dev us-east-1
-./scripts/bootstrap-remote-state.sh stable us-east-1
-./scripts/bootstrap-remote-state.sh prod us-east-1
+./scripts/bootstrap-remote-state.sh dev us-east-2
+./scripts/bootstrap-remote-state.sh stable us-east-2
+./scripts/bootstrap-remote-state.sh prod us-east-2
 ```
 
 ### Step 2: Update environment variables
@@ -269,7 +269,7 @@ cd packer/
 export PACKER_VPC_ID="vpc-xxxxxxxxxxxxx"
 export PACKER_SUBNET_ID="subnet-xxxxxxxxxxxxx"
 export ELK_VERSION="8.12.2"
-export AWS_REGION="us-east-1"
+export AWS_REGION="us-east-2"
 
 # Build all roles (parallel recommended in CI)
 ./build-all-amis.sh --parallel
@@ -278,7 +278,7 @@ export AWS_REGION="us-east-1"
 ### Step 4: Generate TLS certificates
 
 ```bash
-export AWS_REGION="us-east-1"
+export AWS_REGION="us-east-2"
 export SSM_PREFIX="/elk/dev"
 export CLUSTER_NAME="acme-elk-dev-cluster"
 export ELASTIC_VERSION="8.12.2"
@@ -293,12 +293,12 @@ export ELASTIC_VERSION="8.12.2"
 aws secretsmanager create-secret \
   --name /elk/dev/elastic-password \
   --secret-string '{"password":"REPLACE_WITH_STRONG_PASSWORD"}' \
-  --region us-east-1
+  --region us-east-2
 
 aws secretsmanager create-secret \
   --name /elk/dev/filebeat-password \
   --secret-string '{"password":"REPLACE_WITH_STRONG_PASSWORD"}' \
-  --region us-east-1
+  --region us-east-2
 
 # Repeat for logstash-password, fluentd-password, metricbeat-password,
 # kibana-system-password, kibana-encryption-key
@@ -307,7 +307,7 @@ aws secretsmanager create-secret \
 ### Step 6: Deploy infrastructure
 
 ```bash
-cd infra-live/dev/us-east-1
+cd infra-live/dev/us-east-2
 
 # Deploy in dependency order
 terragrunt apply --terragrunt-working-dir vpc
@@ -360,7 +360,7 @@ curl -sk -u "elastic:${ELASTIC_PASSWORD}" \
     "type": "s3",
     "settings": {
       "bucket": "acme-elk-dev-snapshots-<account_id>",
-      "region": "us-east-1",
+      "region": "us-east-2",
       "base_path": "elasticsearch-snapshots",
       "compress": true
     }
@@ -478,7 +478,7 @@ Apply policies via the scripts in `configs/elasticsearch/ilm/`.
 
 **Recommendation**: Ubuntu 22.04 LTS as default. Switch via `os_type` Packer variable.
 
-### AMI IDs (us-east-1, as of 2024)
+### AMI IDs (us-east-2, as of 2024)
 
 | OS | AMI ID | Owner |
 |----|--------|-------|
@@ -530,7 +530,7 @@ For prod, enable CRR on the S3 snapshot bucket or use a scheduled Lambda to copy
 aws s3 sync \
   s3://acme-elk-prod-snapshots-<account-id>/elasticsearch-snapshots/ \
   s3://acme-elk-prod-snapshots-dr-<account-id>/elasticsearch-snapshots/ \
-  --source-region us-east-1 \
+  --source-region us-east-2 \
   --region eu-west-1
 ```
 

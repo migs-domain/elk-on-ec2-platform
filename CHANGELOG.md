@@ -22,9 +22,9 @@ Uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **alb**: Internal ALB for Kibana + public ALB for app hosts; TLS 1.3 only; WAF association; ALB access logging
 
 #### Infrastructure (infra-live)
-- **dev/us-east-1**: Full environment config: VPC, endpoints, SGs, IAM, S3, ALB, ES masters (3×m6i.large), data-hot (1×r6i.xlarge), ingest, Kibana, Logstash
-- **stable/us-east-1**: 3-AZ HA config: 3 masters, 2× r6i.2xlarge data-hot, 2× ingest, 2× Kibana, 2× Logstash
-- **prod/us-east-1**: 3-AZ production config: 3 masters, 3× r6i.2xlarge data-hot, optional warm tier, 2-3× ingest, 2× coord, 2× Kibana, 2× Logstash
+- **dev/us-east-2**: Full environment config: VPC, endpoints, SGs, IAM, S3, ALB, ES masters (3×m6i.large), data-hot (1×r6i.xlarge), ingest, Kibana, Logstash
+- **stable/us-east-2**: 3-AZ HA config: 3 masters, 2× r6i.2xlarge data-hot, 2× ingest, 2× Kibana, 2× Logstash
+- **prod/us-east-2**: 3-AZ production config: 3 masters, 3× r6i.2xlarge data-hot, optional warm tier, 2-3× ingest, 2× coord, 2× Kibana, 2× Logstash
 - Root `terragrunt.hcl` with S3+DynamoDB remote state, provider generation, assume-role per environment
 
 #### AMI Builds (Packer)

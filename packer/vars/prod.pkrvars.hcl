@@ -1,7 +1,7 @@
 ##############################################################################
 # Packer variables file — prod environment
 ##############################################################################
-aws_region    = "us-east-1"
+aws_region    = "us-east-2"
 elk_version   = "8.12.2"
 jdk_version   = "17"
 environment   = "prod"

@@ -1,0 +1,41 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform plan files
+*.tfplan
+
+# Terraform CLI config files
+.terraformrc
+terraform.rc
+
+# Terragrunt
+.terragrunt-cache/
+
+# Sensitive variable files
+*.tfvars
+*.tfvars.json
+
+# Environment files
+.env
+.env.*
+
+# Mac/Linux noise
+.DS_Store
+Thumbs.db
+
+# Editors
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Logs
+*.log

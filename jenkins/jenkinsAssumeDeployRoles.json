@@ -1,0 +1,21 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AssumeELKDeployRoles",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": [
+        "arn:aws:iam::DEV_ACCOUNT_ID:role/TerraformDeployRole-dev",
+        "arn:aws:iam::STABLE_ACCOUNT_ID:role/TerraformDeployRole-stable",
+        "arn:aws:iam::PROD_ACCOUNT_ID:role/TerraformDeployRole-prod"
+      ]
+    },
+    {
+      "Sid": "AllowIdentityCheck",
+      "Effect": "Allow",
+      "Action": "sts:GetCallerIdentity",
+      "Resource": "*"
+    }
+  ]
+}

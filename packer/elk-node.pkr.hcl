@@ -37,7 +37,7 @@ variable "jdk_version" {
 
 variable "aws_region" {
   type    = string
-  default = "us-east-1"
+  default = "us-east-2"
 }
 
 variable "vpc_id" {
@@ -57,7 +57,7 @@ variable "instance_type" {
 
 variable "ami_regions" {
   type    = list(string)
-  default = ["us-east-1"]
+  default = ["us-east-2"]
 }
 
 variable "encrypt_boot" {

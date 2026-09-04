@@ -6,8 +6,8 @@
 set -euo pipefail
 
 ENVIRONMENT="${1:?Usage: $0 <environment> <region>}"
-REGION="${2:-us-east-1}"
-ORG_PREFIX="${ORG_PREFIX:-acme}"
+REGION="${2:-us-east-2}"
+ORG_PREFIX="${ORG_PREFIX:-constantine}"
 PROJECT="${PROJECT:-elk}"
 
 BUCKET="${ORG_PREFIX}-${PROJECT}-tfstate-${REGION}"
@@ -29,7 +29,7 @@ else
     --create-bucket-configuration LocationConstraint="$REGION" 2>/dev/null || \
   aws s3api create-bucket \
     --bucket "$BUCKET" \
-    --region "$REGION"  # us-east-1 doesn't need LocationConstraint
+    --region "$REGION"  # us-east-2 doesn't need LocationConstraint
 
   aws s3api put-bucket-versioning \
     --bucket "$BUCKET" \
@@ -56,6 +56,9 @@ else
       "Rules": [{
         "ID": "expire-old-state-versions",
         "Status": "Enabled",
+        "Filter": {
+            "Prefix": ""
+        },
         "NoncurrentVersionExpiration": {"NoncurrentDays": 90}
       }]
     }'
